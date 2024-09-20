@@ -75,20 +75,73 @@
 # print(combined_summary)
 
 
+# import requests
+# # A library for parsing HTML and XML documents.
+# from bs4 import BeautifulSoup 
+# # Part of the Hugging Face library, used for various Naturel Language Processing tasks including summarization.
+# from transformers import pipeline
+
+# # Step 1: Fetch HTML content from a webpage
+# url = "https://en.wikipedia.org/wiki/Shin_guard" 
+# # function is used to fetch the content of the webpage and stores it in html_content
+# response = requests.get(url)
+# html_content = response.content
+
+# # Step 2: Parse HTML and extract text
+# # BeautifulSoup is used to parse the HTML content
+# soup = BeautifulSoup(html_content, "html.parser")
+# # get_text() method extracts all the text from the parsed HTML, removing HTML tags.
+# text = soup.get_text()
+
+# #Clean and preprocess the text (e.g., remove extra whitespace, etc.)
+# clean_text = ' '.join(text.split())
+
+# # Step 3: Load the summarization pipeline from Hugging Face
+# # This creates a summarization pipeline using a pre-trained model from Hugging Face 
+# summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", revision="a4f8f3e")
+
+# # Step 4: Split the text into smaller chunks
+# # The maximum sequence length for the model is set to 1024 tokens.
+# # The cleaned text is split into chunks of this maximum length using a list comprehension.
+# max_chunk_length = 1024  # Maximum sequence length for the model
+# chunks = [clean_text[i:i + max_chunk_length] for i in range(0, len(clean_text), max_chunk_length)]
+
+# # Step 5: Summarize each 
+# # This loop iterates over each chunk of text.
+# # For each chunk, it generates a summary using the summarization pipeline.
+# # The summary is limited to between 20 and 150 tokens.
+# # do_sample=False means it uses a deterministic approach (beam search) rather than random sampling.
+# # The generated summary for each chunk is appended to the summaries list.
+
+# summaries = []
+# for chunk in chunks:
+#     summary = summarizer(chunk, max_length=150, min_length=20, do_sample=False, clean_up_tokenization_spaces=True)
+#     summaries.append(summary[0]['summary_text'])
+
+# # Step 6: Combine and print the summarized text
+# combined_summary = ' '.join(summaries)
+# print("Summary:")
+# print(combined_summary)
+
+
 import requests
 from bs4 import BeautifulSoup
 from transformers import pipeline
 
 # Step 1: Fetch HTML content from a webpage
-url = "https://www.amazon.co.uk/"  # Replace with the URL you want to scrape
+url = "https://editorial.rottentomatoes.com/article/agatha-all-along-first-reviews-kathryn-hahn-powers-a-unique-satisfying-spin-off/"
 response = requests.get(url)
 html_content = response.content
 
-# Step 2: Parse HTML and extract text
+# Step 2: Parse HTML and extract text from headers and paragraphs
 soup = BeautifulSoup(html_content, "html.parser")
-text = soup.get_text()
+headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+paragraphs = soup.find_all('p')
 
-# Optional: Clean and preprocess the text (e.g., remove extra whitespace, etc.)
+# Combine headers and paragraphs text
+text = ' '.join([element.get_text() for element in headers + paragraphs])
+
+# Clean and preprocess the text
 clean_text = ' '.join(text.split())
 
 # Step 3: Load the summarization pipeline from Hugging Face
@@ -101,7 +154,7 @@ chunks = [clean_text[i:i + max_chunk_length] for i in range(0, len(clean_text), 
 # Step 5: Summarize each chunk
 summaries = []
 for chunk in chunks:
-    summary = summarizer(chunk, max_length=150, min_length=50, do_sample=False, clean_up_tokenization_spaces=True)
+    summary = summarizer(chunk, max_length=150, min_length=20, do_sample=False, clean_up_tokenization_spaces=True)
     summaries.append(summary[0]['summary_text'])
 
 # Step 6: Combine and print the summarized text
